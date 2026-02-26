@@ -1,0 +1,39 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+
+# Sensitive files
+**/*-keypair.json
+**/*_keypair.json
+**/*.keypair
+**/id.json
+**/keypair.json
+target/deploy/*-keypair.json
+.anchor/test-ledger/
+
+# Wallet and keys
+.wallet
+.id/
+config/
+wallet.json
+
+# Environment files
+.env
+.env.*
+*.env.local
+
+# IDL files (optional - remove if you want to publish them)
+target/idl/
+
+# Anchor logs
+program-logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

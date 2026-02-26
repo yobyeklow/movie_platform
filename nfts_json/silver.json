@@ -1,0 +1,20 @@
+{
+    "name": "Movie Silver Pass",
+    "symbol": "SILVER",
+    "description": "30-day Silver membership - Watch movies",
+    "image":"https://cyan-practical-spoonbill-100.mypinata.cloud/ipfs/bafybeiew3qggjumdoer6tibn2wfqtdwjfz2w2csrgookmqpyse5huyyyee",
+    "attributes":[
+        {
+            "trait_type":"tier",
+            "value": "silver"
+        },
+        {
+            "trait_type":"duration",
+            "value":"30 days"
+        },
+        {
+            "trait_type":"access",
+            "value":"watch_movies"
+        }
+    ]
+}

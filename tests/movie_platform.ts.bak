@@ -1,0 +1,397 @@
+import * as anchor from "@coral-xyz/anchor";
+import { Program, AnchorProvider, web3 } from "@coral-xyz/anchor";
+import { MoviePlatform } from "../target/types/movie_platform";
+import {
+  TOKEN_PROGRAM_ID,
+  createMint,
+  createAccount,
+  mintTo,
+} from "@solana/spl-token";
+import { expect } from "chai";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
+
+describe("nft_test", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const program = anchor.workspace.MoviePlatform as Program<MoviePlatform>;
+  const connection = provider.connection;
+
+  let authority: Keypair;
+  let user: Keypair;
+  let usdcMint: PublicKey;
+  let treasuryTokenAccount: PublicKey;
+  let userUsdcTokenAccount: PublicKey;
+  let platformConfig: PublicKey;
+  let bronzeCollection: Keypair;
+  let silverCollection: Keypair;
+  let goldCollection: Keypair;
+  let nftAsset: Keypair;
+
+  const bronzePrice = new anchor.BN(1_000_000); // 1 USDC
+  const silverPrice = new anchor.BN(2_500_000); // 2.5 USDC
+  const goldPrice = new anchor.BN(5_000_000); // 5 USDC
+
+  before(async () => {
+    authority = Keypair.generate();
+    user = Keypair.generate();
+
+    platformConfig = PublicKey.findProgramAddressSync(
+      [Buffer.from("platform-config")],
+      program.programId
+    )[0];
+
+    treasuryTokenAccount = PublicKey.findProgramAddressSync(
+      [Buffer.from("treasury")],
+      program.programId
+    )[0];
+
+    bronzeCollection = Keypair.generate();
+    silverCollection = Keypair.generate();
+    goldCollection = Keypair.generate();
+    nftAsset = Keypair.generate();
+
+    await connection.requestAirdrop(
+      authority.publicKey,
+      10 * anchor.web3.LAMPORTS_PER_SOL
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  });
+
+  it("Initializes the platform", async () => {
+    usdcMint = await createMint(
+      connection,
+      authority,
+      authority.publicKey,
+      null,
+      6
+    );
+
+    const tx = await program.methods
+      .initializePlatform(bronzePrice, silverPrice, goldPrice)
+      .accounts({
+        authority: authority.publicKey,
+        config: platformConfig,
+        treasury: treasuryTokenAccount,
+        usdcMint: usdcMint,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([authority])
+      .rpc();
+
+    console.log("Initialize platform tx:", tx);
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.authority.toString()).to.equal(
+      authority.publicKey.toString()
+    );
+    expect(config.treasury.toString()).to.equal(
+      treasuryTokenAccount.toString()
+    );
+    expect(config.bronzePrice.toNumber()).to.equal(bronzePrice.toNumber());
+    expect(config.silverPrice.toNumber()).to.equal(silverPrice.toNumber());
+    expect(config.goldPrice.toNumber()).to.equal(goldPrice.toNumber());
+    expect(config.mintOpenTimestamp.toNumber()).to.equal(0);
+  });
+
+  it("Initializes NFT collections", async () => {
+    const bronzeUri = "https://example.com/bronze.json";
+    const silverUri = "https://example.com/silver.json";
+    const goldUri = "https://example.com/gold.json";
+
+    const tx = await program.methods
+      .initializeNftCollections(bronzeUri, silverUri, goldUri)
+      .accounts({
+        authority: authority.publicKey,
+        platformConfig: platformConfig,
+        bronzeCollection: bronzeCollection.publicKey,
+        silverCollection: silverCollection.publicKey,
+        goldCollection: goldCollection.publicKey,
+        systemProgram: SystemProgram.programId,
+        mplCoreProgram: new PublicKey(
+          "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        ),
+      })
+      .signers([authority, bronzeCollection, silverCollection, goldCollection])
+      .rpc();
+
+    console.log("Initialize collections tx:", tx);
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.bronzeCollection.toString()).to.equal(
+      bronzeCollection.publicKey.toString()
+    );
+    expect(config.silverCollection.toString()).to.equal(
+      silverCollection.publicKey.toString()
+    );
+    expect(config.goldCollection.toString()).to.equal(
+      goldCollection.publicKey.toString()
+    );
+    expect(config.bronzeNftUri).to.equal(bronzeUri);
+    expect(config.silverNftUri).to.equal(silverUri);
+    expect(config.goldNftUri).to.equal(goldUri);
+  });
+
+  it("Opens minting", async () => {
+    const mintOpenTimestamp = Math.floor(Date.now() / 1000) - 3600;
+
+    const tx = await program.methods
+      .openMint(new anchor.BN(mintOpenTimestamp))
+      .accounts({
+        authority: authority.publicKey,
+        platformConfig: platformConfig,
+      })
+      .signers([authority])
+      .rpc();
+
+    console.log("Open mint tx:", tx);
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.mintOpenTimestamp.toNumber()).to.equal(mintOpenTimestamp);
+    expect(config.firstEditionTimestamp.toNumber()).to.equal(mintOpenTimestamp);
+  });
+
+  it("Mints a Bronze pass", async () => {
+    const tier = 0;
+
+    userUsdcTokenAccount = await createAccount(
+      connection,
+      user,
+      usdcMint,
+      user.publicKey
+    );
+
+    await mintTo(
+      connection,
+      user,
+      usdcMint,
+      userUsdcTokenAccount,
+      user.publicKey,
+      bronzePrice.toNumber()
+    );
+
+    const memberPass = PublicKey.findProgramAddressSync(
+      [Buffer.from("member_pass"), user.publicKey.toBuffer()],
+      program.programId
+    )[0];
+
+    const tx = await program.methods
+      .mintPass(tier)
+      .accounts({
+        user: user.publicKey,
+        platformConfig: platformConfig,
+        memberPass: memberPass,
+        usdcMint: usdcMint,
+        userUsdcAccount: userUsdcTokenAccount,
+        treasuryUsdcAccount: treasuryTokenAccount,
+        asset: nftAsset.publicKey,
+        collection: bronzeCollection.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        mplCoreProgram: new PublicKey(
+          "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        ),
+      })
+      .signers([user, nftAsset])
+      .rpc();
+
+    console.log("Mint Bronze pass tx:", tx);
+
+    const pass = await program.account.memberPass.fetch(memberPass);
+    expect(pass.owner.toString()).to.equal(user.publicKey.toString());
+    expect(pass.tier).to.equal(tier);
+    expect(pass.nftEdition.toNumber()).to.equal(1);
+    expect(pass.nftAsset.toString()).to.equal(nftAsset.publicKey.toString());
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.bronzeNextEdition.toNumber()).to.equal(1);
+
+    const treasuryBalance = await connection.getTokenAccountBalance(
+      treasuryTokenAccount
+    );
+    expect(parseInt(treasuryBalance.value.amount)).to.equal(
+      bronzePrice.toNumber()
+    );
+  });
+
+  it("Mints a Silver pass", async () => {
+    const tier = 1;
+    const nftAsset2 = Keypair.generate();
+
+    await mintTo(
+      connection,
+      user,
+      usdcMint,
+      userUsdcTokenAccount,
+      user.publicKey,
+      silverPrice.toNumber()
+    );
+
+    const memberPass2 = PublicKey.findProgramAddressSync(
+      [Buffer.from("member_pass"), user.publicKey.toBuffer()],
+      program.programId
+    )[0];
+
+    const tx = await program.methods
+      .mintPass(tier)
+      .accounts({
+        user: user.publicKey,
+        platformConfig: platformConfig,
+        memberPass: memberPass2,
+        usdcMint: usdcMint,
+        userUsdcAccount: userUsdcTokenAccount,
+        treasuryUsdcAccount: treasuryTokenAccount,
+        asset: nftAsset2.publicKey,
+        collection: silverCollection.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        mplCoreProgram: new PublicKey(
+          "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        ),
+      })
+      .signers([user, nftAsset2])
+      .rpc();
+
+    console.log("Mint Silver pass tx:", tx);
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.silverNextEdition.toNumber()).to.equal(1);
+  });
+
+  it("Mints a Gold pass", async () => {
+    const tier = 2;
+    const nftAsset3 = Keypair.generate();
+
+    await mintTo(
+      connection,
+      user,
+      usdcMint,
+      userUsdcTokenAccount,
+      user.publicKey,
+      goldPrice.toNumber()
+    );
+
+    const memberPass3 = PublicKey.findProgramAddressSync(
+      [Buffer.from("member_pass"), user.publicKey.toBuffer()],
+      program.programId
+    )[0];
+
+    const tx = await program.methods
+      .mintPass(tier)
+      .accounts({
+        user: user.publicKey,
+        platformConfig: platformConfig,
+        memberPass: memberPass3,
+        usdcMint: usdcMint,
+        userUsdcAccount: userUsdcTokenAccount,
+        treasuryUsdcAccount: treasuryTokenAccount,
+        asset: nftAsset3.publicKey,
+        collection: goldCollection.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        mplCoreProgram: new PublicKey(
+          "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        ),
+      })
+      .signers([user, nftAsset3])
+      .rpc();
+
+    console.log("Mint Gold pass tx:", tx);
+
+    const config = await program.account.platformConfig.fetch(platformConfig);
+    expect(config.goldNextEdition.toNumber()).to.equal(1);
+  });
+
+  it("Fails to mint when minting is not open", async () => {
+    const nftAsset4 = Keypair.generate();
+    const memberPass4 = PublicKey.findProgramAddressSync(
+      [Buffer.from("member_pass"), user.publicKey.toBuffer()],
+      program.programId
+    )[0];
+
+    const user2 = Keypair.generate();
+    await connection.requestAirdrop(
+      user2.publicKey,
+      1 * anchor.web3.LAMPORTS_PER_SOL
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const user2UsdcTokenAccount = await createAccount(
+      connection,
+      user2,
+      usdcMint,
+      user2.publicKey
+    );
+
+    await mintTo(
+      connection,
+      user2,
+      usdcMint,
+      user2UsdcTokenAccount,
+      user2.publicKey,
+      bronzePrice.toNumber()
+    );
+
+    try {
+      await program.methods
+        .mintPass(0)
+        .accounts({
+          user: user2.publicKey,
+          platformConfig: platformConfig,
+          memberPass: memberPass4,
+          usdcMint: usdcMint,
+          userUsdcAccount: user2UsdcTokenAccount,
+          treasuryUsdcAccount: treasuryTokenAccount,
+          asset: nftAsset4.publicKey,
+          collection: bronzeCollection.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          mplCoreProgram: new PublicKey(
+            "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+          ),
+        })
+        .signers([user2, nftAsset4])
+        .rpc();
+
+      expect.fail("Should have failed with MintingNotOpen error");
+    } catch (error) {
+      expect(error.toString()).to.include("MintingNotOpen");
+    }
+  });
+
+  it("Fails to mint with invalid collection", async () => {
+    const nftAsset5 = Keypair.generate();
+    const invalidCollection = Keypair.generate();
+    const memberPass5 = PublicKey.findProgramAddressSync(
+      [Buffer.from("member_pass"), user.publicKey.toBuffer()],
+      program.programId
+    )[0];
+
+    try {
+      await program.methods
+        .mintPass(0)
+        .accounts({
+          user: user.publicKey,
+          platformConfig: platformConfig,
+          memberPass: memberPass5,
+          usdcMint: usdcMint,
+          userUsdcAccount: userUsdcTokenAccount,
+          treasuryUsdcAccount: treasuryTokenAccount,
+          asset: nftAsset5.publicKey,
+          collection: invalidCollection.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          mplCoreProgram: new PublicKey(
+            "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+          ),
+        })
+        .signers([user, nftAsset5])
+        .rpc();
+
+      expect.fail("Should have failed with InvalidCollection error");
+    } catch (error) {
+      expect(error.toString()).to.include("InvalidCollection");
+    }
+  });
+});

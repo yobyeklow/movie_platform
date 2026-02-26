@@ -1,0 +1,20 @@
+{
+    "name": "Movie Gold Pass",
+    "symbol": "GOLD",
+    "description": "30-day Gold membership - Watch movies",
+    "image":"https://cyan-practical-spoonbill-100.mypinata.cloud/ipfs/bafybeiftnbg3zmhq5nxse2psgw5oyn64kb7bmo7xawyzj75n757z7k6kmq",
+    "attributes":[
+        {
+            "trait_type":"tier",
+            "value": "gold"
+        },
+        {
+            "trait_type":"duration",
+            "value":"30 days"
+        },
+        {
+            "trait_type":"access",
+            "value":"watch_movies"
+        }
+    ]
+}

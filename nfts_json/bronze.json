@@ -1,0 +1,20 @@
+{
+    "name": "Movie Bronze Pass",
+    "symbol": "BRONZE",
+    "description": "30-day Bronze membership - Watch movies",
+    "image":"https://cyan-practical-spoonbill-100.mypinata.cloud/ipfs/bafybeibjlxyjfp722me5gcjafo4be4si6z43bsxxsfkaldztw2f5f4hi3e",
+    "attributes":[
+        {
+            "trait_type":"tier",
+            "value": "bronze"
+        },
+        {
+            "trait_type":"duration",
+            "value":"30 days"
+        },
+        {
+            "trait_type":"access",
+            "value":"watch_movies"
+        }
+    ]
+}
