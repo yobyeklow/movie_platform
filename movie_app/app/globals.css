@@ -37,7 +37,6 @@
 
 * {
   box-sizing: border-box;
-  cursor: none;
 }
 
 html,
@@ -53,28 +52,6 @@ body {
   position: relative;
 }
 
-/* Custom Cursor */
-.cursor {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--accent-orange);
-  border-radius: 0;
-  position: fixed;
-  pointer-events: none;
-  z-index: 99999;
-  mix-blend-mode: difference;
-  transition: transform 0.1s ease;
-}
-
-.cursor-dot {
-  width: 4px;
-  height: 4px;
-  background: var(--accent-cyan);
-  border-radius: 0;
-  position: fixed;
-  pointer-events: none;
-  z-index: 99999;
-}
 
 /* Scanline Effect */
 .scanlines::before {

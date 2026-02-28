@@ -1,4 +1,4 @@
-import axios from "axios";
+import { ApiClient } from "./api_service";
 
 interface Movie {
   adult: Boolean;
@@ -16,6 +16,7 @@ interface Movie {
   vote_average: Number;
   vote_count: Number;
 }
+
 interface MovieDetail {
   adult: boolean;
   backdrop_path: string;
@@ -66,6 +67,7 @@ interface SpokenLanguage {
   iso_639_1: string;
   name: string;
 }
+
 interface Video {
   iso_639_1: string;
   iso_3166_1: string;
@@ -80,104 +82,154 @@ interface Video {
 }
 
 class TMDBService {
-  private instance = axios.create({
-    baseURL: "https://api.themoviedb.org/3",
-    timeout: 10000,
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_API_KEY}`,
-      Accept: "application/json",
-    },
-  });
+  private client: ApiClient;
+
+  constructor() {
+    this.client = new ApiClient({
+      baseURL: "https://api.themoviedb.org/3",
+      timeout: 10000,
+      enableCache: true,
+      enableRetry: true,
+      maxRetries: 3,
+      retryDelay: 1000,
+    });
+
+    this.client.setAuthToken(
+      process.env.NEXT_PUBLIC_TMDB_API_KEY || "",
+      "Bearer"
+    );
+  }
 
   async getPopularMovies(page: number): Promise<Movie[]> {
-    try {
-      let res = await this.instance.get(`/discover/movie`, {
-        params: {
-          include_adult: false,
-          include_video: false,
-          language: "en-US",
-          page,
-          sort_by: "popularity.desc",
-        },
-      });
-      if (res.status == 200 && res.data?.results) {
-        return res.data.results;
-      }
-      return [];
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return [];
+    const response = await this.client.get<any>(`/discover/movie`, {
+      params: {
+        include_adult: false,
+        include_video: false,
+        language: "en-US",
+        page,
+        sort_by: "popularity.desc",
+      },
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.MEDIUM, 
+    });
+
+    if (response.data?.results) {
+      return response.data.results;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
   }
+
   async getMoviesByGenre(genreId: number, page: number): Promise<Movie[]> {
-    try {
-      let res = await this.instance.get(`/movie/${genreId}/similar`, {
-        params: {
-          language: "en-US",
-          page,
-        },
-      });
-      if (res.status == 200 && res.data?.results) {
-        return res.data.results;
-      }
-      return [];
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return [];
+    const response = await this.client.get<any>(`/movie/${genreId}/similar`, {
+      params: {
+        language: "en-US",
+        page,
+      },
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.MEDIUM,
+    });
+
+    if (response.data?.results) {
+      return response.data.results;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
   }
+
   async searchMovies(query: string, page: number): Promise<Movie[]> {
-    try {
-      let res = await this.instance.get(`/search/movie`, {
-        params: {
-          query,
-          page,
-        },
-      });
-      if (res.status == 200 && res.data?.results) {
-        return res.data.results;
-      }
-      return [];
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return [];
+    const response = await this.client.get<any>(`/search/movie`, {
+      params: {
+        query,
+        page,
+      },
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.SHORT, 
+    });
+
+    if (response.data?.results) {
+      return response.data.results;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
   }
+
   async getMovieDetails(id: number): Promise<MovieDetail | undefined> {
-    try {
-      let res = await this.instance.get(`/movie/${id}`);
-      if (res.status == 200 && res.data) {
-        return res.data;
-      }
-      return undefined;
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return undefined;
+    const response = await this.client.get<MovieDetail>(`/movie/${id}`, {
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.VERY_LONG, 
+    });
+
+    if (response.data) {
+      return response.data;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return undefined;
   }
+
   async getMovieVideos(id: number): Promise<Video[]> {
-    try {
-      let res = await this.instance.get(`/movie/${id}/videos`);
-      if (res.status == 200 && res.data?.results) {
-        return res.data.results;
-      }
-      return [];
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return [];
+    const response = await this.client.get<any>(`/movie/${id}/videos`, {
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.LONG, 
+    });
+
+    if (response.data?.results) {
+      return response.data.results;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
   }
+
   async getGenres(): Promise<Genre[]> {
-    try {
-      let res = await this.instance.get(`/genre/movie/list`);
-      if (res.status == 200 && res.data?.genres) {
-        return res.data.genres;
-      }
-      return [];
-    } catch (error: any) {
-      console.error(error.response?.data?.status_message || error.message);
-      return [];
+    const response = await this.client.get<any>(`/genre/movie/list`, {
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.DAY, 
+    });
+
+    if (response.data?.genres) {
+      return response.data.genres;
     }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
+  }
+
+
+  clearCache(): void {
+    this.client.clearCache();
+  }
+
+
+  invalidateCache(pattern: string): number {
+    return this.client.invalidateCache(pattern);
+  }
+
+  getCacheStats() {
+    return this.client.getCacheStats();
   }
 }
+
 export default new TMDBService();

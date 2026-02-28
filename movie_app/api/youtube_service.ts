@@ -1,4 +1,4 @@
-import axios from "axios";
+import { ApiClient } from "./api_service";
 
 interface Video {
   id: string;
@@ -61,30 +61,27 @@ interface VideoDetailResponse {
 }
 
 class YouTubeService {
-  private instance = axios.create({
-    baseURL: "https://www.googleapis.com/youtube/v3",
-    timeout: 10000,
-    headers: {
-      Accept: "application/json",
-    },
-  });
+  private client: ApiClient;
+  private apiKey: string;
 
-  private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private readonly CACHE_TTL = 3600000;
+  constructor() {
 
-  private getFromCache(key: string): any | null {
-    const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      return cached.data;
-    }
-    this.cache.delete(key);
-    return null;
+    this.client = new ApiClient({
+      baseURL: "https://www.googleapis.com/youtube/v3",
+      timeout: 10000,
+      enableCache: true,
+      enableRetry: true,
+      maxRetries: 3,
+      retryDelay: 1000,
+    });
+
+    this.apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || "";
   }
 
-  private setCache(key: string, data: any): void {
-    this.cache.set(key, { data, timestamp: Date.now() });
-  }
-
+  /**
+   * Parse YouTube ISO 8601 duration format to seconds
+   * Example: "PT1H30M45S" → 5445 seconds
+   */
   private parseDuration(duration: string): number {
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
     if (!match) return 0;
@@ -97,16 +94,10 @@ class YouTubeService {
   }
 
   async searchVideos(query: string, maxResults: number = 10): Promise<Video[]> {
-    const cacheKey = `search:${query}:${maxResults}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
     try {
-      const res = await this.instance.get<VideoSearchResponse>("/search", {
+      const response = await this.client.get<VideoSearchResponse>("/search", {
         params: {
-          key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
+          key: this.apiKey,
           part: "snippet",
           q: `${query} movie trailer`,
           type: "video",
@@ -116,94 +107,89 @@ class YouTubeService {
           videoDuration: "medium",
           videoLicense: "creativeCommon",
         },
+        cache: true,
+        cacheTTL: ApiClient.CACHE_TTL.LONG, 
       });
 
-      if (res.status === 200 && res.data?.items) {
-        const videoIds = res.data.items
+      if (response.data?.items) {
+        const videoIds = response.data.items
           .map((item) => item.id.videoId)
           .filter(Boolean) as string[];
 
         if (videoIds.length > 0) {
           const detailedVideos = await this.getVideosByIds(videoIds);
-          this.setCache(cacheKey, detailedVideos);
           return detailedVideos;
         }
       }
 
       return [];
-    } catch (error: any) {
-      console.error(
-        "YouTube search error:",
-        error.response?.data?.error?.message || error.message
-      );
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("YouTube search error:", error.message);
+      }
       return [];
     }
   }
 
-  private async getVideosByIds(videoIds: string[]): Promise<Video[]> {
-    const cacheKey = `videos:${videoIds.join(",")}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached) {
-      return cached;
-    }
 
+  private async getVideosByIds(videoIds: string[]): Promise<Video[]> {
     try {
-      const res = await this.instance.get<VideoDetailResponse>("/videos", {
+      const response = await this.client.get<VideoDetailResponse>("/videos", {
         params: {
-          key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
+          key: this.apiKey,
           part: "snippet,contentDetails,statistics",
           id: videoIds.join(","),
         },
+        cache: true,
+        cacheTTL: ApiClient.CACHE_TTL.DAY, 
       });
 
-      if (res.status === 200 && res.data?.items) {
-        const videos = res.data.items;
-        this.setCache(cacheKey, videos);
+      if (response.data?.items) {
+        const videos = response.data.items;
         return videos;
       }
 
       return [];
-    } catch (error: any) {
-      console.error(
-        "YouTube videos fetch error:",
-        error.response?.data?.error?.message || error.message
-      );
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("YouTube videos fetch error:", error.message);
+      }
       return [];
     }
   }
 
-  async getVideoById(videoId: string): Promise<Video | null> {
-    const cacheKey = `video:${videoId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached) {
-      return cached;
-    }
 
+  async getVideoById(videoId: string): Promise<Video | null> {
     try {
-      const res = await this.instance.get<VideoDetailResponse>("/videos", {
+      const response = await this.client.get<VideoDetailResponse>("/videos", {
         params: {
-          key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
+          key: this.apiKey,
           part: "snippet,contentDetails,statistics",
           id: videoId,
         },
+        cache: true,
+        cacheTTL: ApiClient.CACHE_TTL.DAY, 
       });
 
-      if (res.status === 200 && res.data?.items?.[0]) {
-        const video = res.data.items[0];
-        this.setCache(cacheKey, video);
+      if (response.data?.items?.[0]) {
+        const video = response.data.items[0];
         return video;
       }
 
       return null;
-    } catch (error: any) {
-      console.error(
-        "YouTube video fetch error:",
-        error.response?.data?.error?.message || error.message
-      );
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("YouTube video fetch error:", error.message);
+      }
       return null;
     }
   }
 
+  /**
+   * Validate a video meets requirements:
+   * - Minimum 5 minutes (300 seconds)
+   * - Maximum 4 hours (14400 seconds)
+   */
   async validateVideo(videoId: string): Promise<boolean> {
     try {
       const video = await this.getVideoById(videoId);
@@ -214,20 +200,19 @@ class YouTubeService {
 
       const duration = this.parseDuration(video.contentDetails.duration);
 
-      if (duration < 300) {
-        return false;
-      }
-
-      if (duration > 14400) {
+      if (duration < 300 || duration > 14400) {
         return false;
       }
 
       return true;
-    } catch (error: any) {
-      console.error("Video validation error:", error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Video validation error:", error.message);
+      }
       return false;
     }
   }
+
 
   getEmbedUrl(
     videoId: string,
@@ -254,6 +239,7 @@ class YouTubeService {
     return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
   }
 
+
   getThumbnailUrl(
     videoId: string,
     quality: "default" | "medium" | "high" | "standard" | "maxres" = "high"
@@ -268,6 +254,7 @@ class YouTubeService {
 
     return `https://img.youtube.com/vi/${videoId}/${qualityMap[quality]}.jpg`;
   }
+
 
   async searchTrailers(
     movieTitle: string,
@@ -285,6 +272,7 @@ class YouTubeService {
       );
     });
 
+    
     const validVideos = await Promise.all(
       filteredVideos.map(async (video) => {
         const isValid = await this.validateVideo(video.id);
@@ -295,16 +283,19 @@ class YouTubeService {
     return validVideos.filter(Boolean) as Video[];
   }
 
+
   clearCache(): void {
-    this.cache.clear();
+    this.client.clearCache();
   }
 
-  clearCachePattern(pattern: string): void {
-    for (const key of this.cache.keys()) {
-      if (key.includes(pattern)) {
-        this.cache.delete(key);
-      }
-    }
+
+  clearCachePattern(pattern: string): number {
+    return this.client.invalidateCache(pattern);
+  }
+
+
+  getCacheStats() {
+    return this.client.getCacheStats();
   }
 }
 
