@@ -134,8 +134,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
             crew: [],
             videos: [],
           };
-
-          // Fetch videos
           const videos = await tmdbService.getMovieVideos(movieId);
           transformedMovie.videos = (videos || []).map((v: any) => ({
             id: v.id,
@@ -148,7 +146,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
             publishedAt: v.published_at,
           }));
 
-          // Debug: Log video data to help identify issues
           console.log(`=== Fetched ${videos?.length || 0} videos for movie ${movieId} ===`);
           if (transformedMovie.videos.length > 0) {
             debugVideoData(transformedMovie.videos);
@@ -156,7 +153,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
             console.warn("No videos found for this movie");
           }
 
-          // Set first video as selected
           if (transformedMovie.videos.length > 0) {
             const firstVideo = transformedMovie.videos[0];
             setSelectedVideo(firstVideo);
@@ -165,7 +161,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
             setSelectedVideo(null);
           }
 
-          // Load saved watch progress
           const savedProgress = getWatchProgress(movieId);
           setCurrentTime(savedProgress);
 
@@ -220,7 +215,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
 
   const handleTimeUpdate = (time: number): void => {
     setCurrentTime(time);
-    // Save progress every 5 seconds
     if (movie && Math.floor(time) % 5 === 0) {
       saveWatchProgress(movie.id, time);
     }
@@ -302,37 +296,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
 
   return (
     <div className="min-h-screen bg-[#050505] diagonal-stripes relative">
-      {/* Navigation */}
-      <div className="fixed top-0 left-0 right-0 z-50 border-b-2 border-[#222] bg-[#050505]/90 backdrop-blur-sm flex items-center justify-center">
-        <div className="max-w-[1400px] w-full px-6">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-4">
-              {onBack && <BackButton onClick={onBack} />}
-              <div className="w-12 h-12 brutal-border bg-[#0a0a0a] flex items-center justify-center">
-                <span className="font-display text-xl font-black text-[#ff6b35]">
-                  S
-                </span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="font-display font-black text-lg tracking-tight text-white">
-                  SOL//STREAM
-                </h1>
-                <p className="font-mono text-[10px] text-[#00d9ff] tracking-[0.2em]">
-                  DECENTRALIZED_CINEMA
-                </p>
-              </div>
-            </div>
-
-            <div className="font-mono text-xs">
-              <span className="text-[#e5e5e5]/40">ID:</span>
-              <span className="text-[#ff6b35] ml-2">{movie.id}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <main className="pt-32 pb-24">
-        {/* Platform Info Banner */}
         <section className="w-full max-w-[1400px] mx-auto px-6 mb-8">
           <div className="p-4 bg-[#00d9ff]/10 border-l-2 border-[#00d9ff] brutal-border">
             <div className="flex items-start gap-4">
@@ -350,7 +314,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
           </div>
         </section>
 
-        {/* Hero Section */}
         <section className="w-full max-w-[1400px] mx-auto px-6 mb-12">
           <div className="relative overflow-hidden border-2 border-[#222]">
             <div className="absolute top-0 right-0 w-32 h-32 border-l-2 border-b-2 border-[#ff6b35] z-10" />  
@@ -371,9 +334,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
                 )}
               </div>
 
-              {/* Movie Info */}
               <div className="p-8 lg:p-12 bg-[#0a0a0a] flex flex-col">
-
                 <div className="flex items-center gap-3 mb-4">
                   {movie.status && (
                     <span className="font-mono text-[10px] tracking-[0.3em] text-[#cfff04]">
@@ -418,7 +379,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
                   </div>
                 )}
 
-                {/* Overview */}
                 <div className="mb-8">
                   <h3 className="font-mono text-[10px] text-[#e5e5e5]/40 mb-3 tracking-wider">
                     SYNOPSIS
@@ -530,8 +490,6 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movieId, onBack }) => {
             </div>
           </section>
         )}
-
-        
       </main>
     </div>
   );

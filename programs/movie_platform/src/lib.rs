@@ -37,4 +37,8 @@ pub mod movie_platform {
     pub fn mint_pass(ctx: Context<MintPass>, tier: u8) -> Result<()> {
         mint_pass::handler(ctx, tier)
     }
+
+    pub fn verify_pass(ctx: Context<VerifyPass>) -> Result<(u8)> {
+        verify_pass::handler(ctx)
+    }
 }

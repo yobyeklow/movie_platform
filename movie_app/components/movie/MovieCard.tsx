@@ -52,7 +52,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`movie-card brutal-border bg-[#0a0a0a] group relative overflow-hidden animate-stagger cursor-pointer`}
+      className={`movie-card w-full h-full brutal-border bg-[#0a0a0a] group relative overflow-hidden animate-stagger cursor-pointer`}
       style={{ animationDelay }}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
@@ -93,7 +93,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
         </h3>
         <div className="flex items-center justify-between mb-2">
           {showYear && movie.releaseDate && (
-            <span className="font-mono text-[10px] text-[#e5e5e5]/40">
+            <span className="font-mono text-xs text-[#e5e5e5]/40">
               {getYear(movie.releaseDate)}
             </span>
           )}

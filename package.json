@@ -2,7 +2,13 @@
   "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "local:start": "bash start-local.sh",
+    "local:start:quick": "bash start-local-quick.sh",
+    "local:stop": "bash stop-local.sh",
+    "admin:init": "ts-node scripts/init-platform.ts",
+    "admin:collections": "ts-node scripts/init-collections.ts",
+    "admin:open": "ts-node scripts/open-mint.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

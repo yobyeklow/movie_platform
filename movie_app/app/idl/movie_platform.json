@@ -1,0 +1,618 @@
+{
+  "address": "AUDCmmdnbhWP9eaz3WFXVcLLkTQ7vLx7knj9xB2zQmU",
+  "metadata": {
+    "name": "movie_platform",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize_nft_collections",
+      "discriminator": [
+        122,
+        215,
+        71,
+        11,
+        108,
+        102,
+        111,
+        78
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bronze_collection",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "silver_collection",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "gold_collection",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "bronze_uri",
+          "type": "string"
+        },
+        {
+          "name": "silver_uri",
+          "type": "string"
+        },
+        {
+          "name": "gold_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "initialize_platform",
+      "discriminator": [
+        119,
+        201,
+        101,
+        45,
+        75,
+        122,
+        89,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "bronze_price",
+          "type": "u64"
+        },
+        {
+          "name": "silver_price",
+          "type": "u64"
+        },
+        {
+          "name": "gold_price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "mint_pass",
+      "discriminator": [
+        142,
+        56,
+        26,
+        197,
+        227,
+        241,
+        84,
+        174
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_pass",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114,
+                  95,
+                  112,
+                  97,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint",
+          "writable": true
+        },
+        {
+          "name": "user_usdc_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_usdc_account",
+          "writable": true
+        },
+        {
+          "name": "asset",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "collection",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "mpl_core_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        }
+      ],
+      "args": [
+        {
+          "name": "tier",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "open_mint",
+      "discriminator": [
+        100,
+        129,
+        101,
+        33,
+        167,
+        150,
+        111,
+        9
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "mint_open_timestamp",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "verify_pass",
+      "discriminator": [
+        107,
+        157,
+        219,
+        148,
+        135,
+        197,
+        104,
+        35
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "member_pass",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114,
+                  95,
+                  112,
+                  97,
+                  115,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "MemberPass",
+      "discriminator": [
+        254,
+        244,
+        38,
+        234,
+        253,
+        158,
+        88,
+        14
+      ]
+    },
+    {
+      "name": "PlatformConfig",
+      "discriminator": [
+        160,
+        78,
+        128,
+        0,
+        248,
+        83,
+        230,
+        160
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTier",
+      "msg": "Invalid tier, must be 0, 1 or 2"
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient USDC balance"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidScore",
+      "msg": "Rating score must be between 1 and 5"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidCollection",
+      "msg": "Invalid Collection"
+    },
+    {
+      "code": 6004,
+      "name": "PassAlreadyActive",
+      "msg": "Pass already active, cannot re-mint"
+    },
+    {
+      "code": 6005,
+      "name": "PassExpired",
+      "msg": "Member pass has expired!"
+    },
+    {
+      "code": 6006,
+      "name": "PassNotFound",
+      "msg": "Member Pass not found - user needs to mint"
+    },
+    {
+      "code": 6007,
+      "name": "TierTooLow",
+      "msg": "Tier too low, Silver or Gold required"
+    },
+    {
+      "code": 6008,
+      "name": "ContentTooLong",
+      "msg": "Comment content exceeds 500 characters"
+    },
+    {
+      "code": 6009,
+      "name": "MintingNotOpen",
+      "msg": "The minting is not open yet"
+    },
+    {
+      "code": 6010,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: Only authority can perferm this action"
+    },
+    {
+      "code": 6011,
+      "name": "EditOverflow",
+      "msg": "Overflow value!"
+    }
+  ],
+  "types": [
+    {
+      "name": "MemberPass",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier",
+            "type": "u8"
+          },
+          {
+            "name": "minted_at",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "nft_edition",
+            "type": "u64"
+          },
+          {
+            "name": "nft_asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlatformConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bronze_collection",
+            "type": "pubkey"
+          },
+          {
+            "name": "silver_collection",
+            "type": "pubkey"
+          },
+          {
+            "name": "gold_collection",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "bronze_price",
+            "type": "u64"
+          },
+          {
+            "name": "silver_price",
+            "type": "u64"
+          },
+          {
+            "name": "gold_price",
+            "type": "u64"
+          },
+          {
+            "name": "bronze_nft_uri",
+            "type": "string"
+          },
+          {
+            "name": "silver_nft_uri",
+            "type": "string"
+          },
+          {
+            "name": "gold_nft_uri",
+            "type": "string"
+          },
+          {
+            "name": "bronze_next_edition",
+            "type": "u64"
+          },
+          {
+            "name": "silver_next_edition",
+            "type": "u64"
+          },
+          {
+            "name": "gold_next_edition",
+            "type": "u64"
+          },
+          {
+            "name": "mint_open_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "first_edition_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

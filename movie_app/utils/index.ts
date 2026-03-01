@@ -1,9 +1,3 @@
-/**
- * Utils Index
- * Central export point for all utility functions
- */
-
-// Watch progress utilities
 export {
   saveWatchProgress,
   getWatchProgress,
@@ -20,7 +14,6 @@ export {
   type WatchProgressStorage,
 } from "./watchProgress";
 
-// Video debug utilities
 export {
   isValidYouTubeVideoId,
   getYouTubeEmbedUrl,
@@ -31,3 +24,5 @@ export {
   isYouTubeApiLoaded,
   waitForYouTubeApi,
 } from "./videoDebug";
+
+export {connection} from "./connection"

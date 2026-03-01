@@ -20,6 +20,9 @@ pub enum PlatformError {
     #[msg("Member pass has expired!")]
     PassExpired,
 
+    #[msg("Member Pass not found - user needs to mint")]
+    PassNotFound,
+
     #[msg("Tier too low, Silver or Gold required")]
     TierTooLow,
 

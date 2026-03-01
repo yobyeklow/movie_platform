@@ -203,11 +203,31 @@ class TMDBService {
   async getGenres(): Promise<Genre[]> {
     const response = await this.client.get<any>(`/genre/movie/list`, {
       cache: true,
-      cacheTTL: ApiClient.CACHE_TTL.DAY, 
+      cacheTTL: ApiClient.CACHE_TTL.DAY,
     });
 
     if (response.data?.genres) {
       return response.data.genres;
+    }
+
+    if (response.error) {
+      console.error(`TMDB Error: ${response.error.message}`);
+    }
+
+    return [];
+  }
+
+  async getTrendingMovies(timeWindow: "day" | "week" = "day", page: number = 1): Promise<Movie[]> {
+    const response = await this.client.get<any>(`/trending/movie/${timeWindow}`, {
+      params: {
+        page,
+      },
+      cache: true,
+      cacheTTL: ApiClient.CACHE_TTL.MEDIUM,
+    });
+
+    if (response.data?.results) {
+      return response.data.results;
     }
 
     if (response.error) {
