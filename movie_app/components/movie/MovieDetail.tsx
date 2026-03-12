@@ -8,7 +8,7 @@ import type {
   Genre,
 } from "./types";
 import VideoPlayerComponent from "./VideoPlayer";
-import tmdbService from "@/api/tmdb_service";
+import tmdbService from "@/services/tmdb_service";
 import {
   saveWatchProgress,
   getWatchProgress,

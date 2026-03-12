@@ -5,7 +5,6 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
-// Config metadata for Interceptors
 declare module 'axios' {
   export interface InternalAxiosRequestConfig {
     metadata?: {

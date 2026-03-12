@@ -24,5 +24,3 @@ export {
   isYouTubeApiLoaded,
   waitForYouTubeApi,
 } from "./videoDebug";
-
-export {connection} from "./connection"

@@ -5,7 +5,7 @@ pub enum PlatformError {
     #[msg("Invalid tier, must be 0, 1 or 2")]
     InvalidTier,
 
-    #[msg("Insufficient USDC balance")]
+    #[msg("Insufficient SOL balance")]
     InsufficientFunds,
 
     #[msg("Rating score must be between 1 and 5")]
@@ -32,9 +32,36 @@ pub enum PlatformError {
     #[msg("The minting is not open yet")]
     MintingNotOpen,
 
-    #[msg("Unauthorized: Only authority can perferm this action")]
+    #[msg("Unauthorized: Only authority can perform this action")]
     Unauthorized,
+
+    #[msg("Unauthorized: Only token mint authority can mint tokens")]
+    UnauthorizedMintAuthority,
+
+    #[msg("Invalid timestamp: cannot be negative")]
+    InvalidTimestamp,
 
     #[msg("Overflow value!")]
     EditOverflow,
+
+    #[msg("Invalid account data or PDA")]
+    InvalidAccount,
+
+    #[msg("Invalid treasury account")]
+    InvalidTreasury,
+
+    #[msg("Invalid treasury owner")]
+    InvalidTreasuryOwner,
+
+    #[msg("Invalid token mint")]
+    InvalidTokenMint,
+
+    #[msg("Invalid token owner")]
+    InvalidTokenOwner,
+
+    #[msg("Invalid treasury ATA")]
+    InvalidTreasuryATA,
+
+    #[msg("Insufficient token balance")]
+    InsufficientTokenBalance,
 }

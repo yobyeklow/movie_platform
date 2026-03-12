@@ -1,6 +1,6 @@
 import type { Genre, Movie } from "@/components/movie/types";
 import { useCallback, useEffect, useState } from "react";
-import tmdb_service from "@/api/tmdb_service";
+import tmdb_service from "@/services/tmdb_service";
 import TransformMovie from "@/utils/TransformMovie";
 
 export function useMovies(){

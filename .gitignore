@@ -1,22 +1,51 @@
+# ====================================
+# Anchor / Solana Development
+# ====================================
 .anchor
-.DS_Store
-target
-**/*.rs.bk
-node_modules
-test-ledger
-.yarn
-.opencode
-.pi
-scripts
+.Anchor.toml.swp
+.program-logs/
 
-# Sensitive files
+# Test ledgers and validator data
+test-ledger/
+.test-ledger/
+
+# Rust build artifacts
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Compiled Solana programs
+*.so
+**/*.so
+
+# IDL files (optional - remove if you want to publish them)
+target/idl/
+
+# ====================================
+# Dependencies
+# ====================================
+node_modules/
+movie_app/node_modules/
+.opencode/
+.pi/
+
+# ====================================
+# Yarn
+# ====================================
+.yarn/
+.yarn/**
+yarn-error.log
+.yarn-integrity
+
+# ====================================
+# Sensitive Files (Keys & Wallets)
+# ====================================
 **/*-keypair.json
 **/*_keypair.json
 **/*.keypair
 **/id.json
 **/keypair.json
 target/deploy/*-keypair.json
-.anchor/test-ledger/
 
 # Wallet and keys
 .wallet
@@ -24,19 +53,89 @@ target/deploy/*-keypair.json
 config/
 wallet.json
 
-# Environment files
+# Scripts folder contains authority-keypair.json
+scripts/authority-keypair.json
+
+# ====================================
+# Environment Files
+# ====================================
 .env
 .env.*
 *.env.local
+!.env.example
 
-# IDL files (optional - remove if you want to publish them)
-target/idl/
-
-# Anchor logs
+# ====================================
+# Process & Runtime Files
+# ====================================
+*.pid
+.validator.pid
+nohup.out
+*.log
 program-logs/
 
-# OS files
-.DS_Store
-Thumbs.db
+# ====================================
+# Next.js / Build Artifacts
+# ====================================
+movie_app/.next/
+movie_app/out/
+movie_app/build/
+movie_app/vercel.json
+movie_app/.swc/
+movie_app/turbo/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# ====================================
+# Testing & Coverage
+# ====================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ====================================
+# IDE & Editor Files
+# ====================================
+.vscode/
+.idea/
 *.swp
 *.swo
+*.swn
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# ====================================
+# Project Specific Files
+# ====================================
+# Runtime configuration files
+.usdc-mint.json
+collection_address.json
+token_config.json
+
+# Deploy scripts (development only)
+deploy/
+
+# Lock files (optional - keep package-lock.json, ignore yarn.lock)
+# yarn.lock
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# ====================================
+# Pi / Agent Specific
+# ====================================
+.pi/
+.pi/**
+.opencode/
+.opencode/**
+skills-lock.json
+
+# ====================================
+# Documentation / Drafts
+# =================================<arg_value></tool_call>

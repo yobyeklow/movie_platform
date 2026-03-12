@@ -97,11 +97,11 @@ export default function NFTCard({
           <span className="font-mono text-[10px] text-[#e5e5e5]/40">
             PRICE
           </span>
-          <span 
+          <span
             className="font-display font-black text-3xl"
             style={{ color: accentColor }}
           >
-            {price} USDC
+            {price} SOL
           </span>
         </div>
 

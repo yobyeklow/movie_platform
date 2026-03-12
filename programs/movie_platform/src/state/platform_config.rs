@@ -4,13 +4,14 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct PlatformConfig {
     pub authority: Pubkey,
+    pub treasury: Pubkey,
+    pub token_mint: Pubkey,          // NEW: SPL Token mint for payments
     pub bronze_collection: Pubkey,
     pub silver_collection: Pubkey,
     pub gold_collection: Pubkey,
-    pub treasury: Pubkey,
-    pub bronze_price: u64,
-    pub silver_price: u64,
-    pub gold_price: u64,
+    pub bronze_price: u64,           // Price in token base units
+    pub silver_price: u64,           // Price in token base units
+    pub gold_price: u64,             // Price in token base units
     #[max_len(256)]
     pub bronze_nft_uri: String,
     #[max_len(256)]

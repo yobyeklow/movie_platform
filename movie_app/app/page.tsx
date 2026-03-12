@@ -1,6 +1,7 @@
 "use client";
 import { MovieCatalog } from "@/components/movie";
 import { useMovies } from "@/hooks/useMovies";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const tickerText =
@@ -8,7 +9,7 @@ const tickerText =
 
 export default function Home() {
   const router = useRouter();
-  const {movies,genres,loading} = useMovies()
+  const { movies, genres, loading } = useMovies();
 
   return (
     <main className="pt-32 pb-24 flex flex-col items-center justify-center">
@@ -16,12 +17,14 @@ export default function Home() {
         <div className="relative overflow-hidden border-2 border-[#222]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:h-[500px]">
             <div className="relative h-[400px] lg:h-[500px] overflow-hidden img-noise">
-              <img
-                src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=1800&fit=crop"
-                alt="Featured"
+              <Image
+                src="https://images.unsplash.com/photo-1536440136628-849c177e76a1"
+                alt="NFT Collection"
+                width={1200}
+                height={1800}
                 className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/50 to-transparent" />  
+              ></Image>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/50 to-transparent" />
             </div>
 
             <div className="p-8 lg:p-12 flex flex-col bg-[#0a0a0a] relative justify-center">
@@ -63,9 +66,7 @@ export default function Home() {
                     <span className="text-white">135_MIN</span>
                   </div>
                   <div>
-                    <span className="text-[#e5e5e5]/40 block mb-1">
-                      RATING
-                    </span>
+                    <span className="text-[#e5e5e5]/40 block mb-1">RATING</span>
                     <span className="text-[#cfff04]">★ 8.9</span>
                   </div>
                 </div>
@@ -83,9 +84,7 @@ export default function Home() {
                     <span className="text-[#cfff04]">4K_HDR</span>
                   </div>
                   <div>
-                    <span className="text-[#e5e5e5]/40 block mb-1">
-                      AUDIO
-                    </span>
+                    <span className="text-[#e5e5e5]/40 block mb-1">AUDIO</span>
                     <span className="text-white">DOLBY_ATMOS</span>
                   </div>
                 </div>
@@ -105,8 +104,13 @@ export default function Home() {
       </div>
 
       <section className="w-full max-w-[1400px] px-6 mb-20">
-        <div className="min-h-screen diagonal-fractions">  
-          <MovieCatalog movies={movies} genres={genres} loading={loading} onMovieClick={(movie)=>router.push(`/movie/${movie.id}`)}></MovieCatalog>
+        <div className="min-h-screen diagonal-fractions">
+          <MovieCatalog
+            movies={movies}
+            genres={genres}
+            loading={loading}
+            onMovieClick={(movie) => router.push(`/movie/${movie.id}`)}
+          ></MovieCatalog>
         </div>
       </section>
 
@@ -121,8 +125,8 @@ export default function Home() {
                 INSTANT
               </h4>
               <p className="font-mono text-[10px] text-[#e5e5e5]/40 leading-relaxed">
-                Zero confirmation transactions. No waiting. No buffering. Pure
-                decentralized streaming powered by Solana's L1.
+                {`Zero confirmation transactions. No waiting. No buffering. Pure
+                decentralized streaming powered by Solana's L1.`}
               </p>
             </div>
 
@@ -165,7 +169,8 @@ export default function Home() {
                 TRENDING_NOW
               </h3>
               <p className="font-mono text-sm text-[#e5e5e5]/80 leading-relaxed max-w-md mb-6">
-                Discover what the world is watching right now. Updated daily based on global engagement metrics.
+                Discover what the world is watching right now. Updated daily
+                based on global engagement metrics.
               </p>
               <a
                 href="/trending"
